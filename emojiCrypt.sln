@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "emojiCrypt", "emojiCrypt\emojiCrypt.csproj", "{79225FF2-558F-4EE9-8D62-FE926AF7C587}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "emojiCryptTests", "emojiCryptTests\emojiCryptTests.csproj", "{CF8A4FDA-5ECE-4BD3-874B-846702869158}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{79225FF2-558F-4EE9-8D62-FE926AF7C587}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79225FF2-558F-4EE9-8D62-FE926AF7C587}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79225FF2-558F-4EE9-8D62-FE926AF7C587}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF8A4FDA-5ECE-4BD3-874B-846702869158}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF8A4FDA-5ECE-4BD3-874B-846702869158}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF8A4FDA-5ECE-4BD3-874B-846702869158}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF8A4FDA-5ECE-4BD3-874B-846702869158}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
