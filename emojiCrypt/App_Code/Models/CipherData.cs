@@ -3,65 +3,116 @@ using System.Security.Cryptography.Xml;
 
 namespace emojiCrypt.App_Code.Models
 {
-    public abstract class ISymmetricCipherData<T>
+    public abstract class ISymmetricCipherData<T, K>
     {
-        private T? Plaintext {  get; set; }
-        private T? Ciphertext { get; set; }
 
-        private T? Key { get; set; }
-        private T? IV { get; set; }
-        public ISymmetricCipher<T, Task<T>> CipherMode;
+        public ISymmetricCipher<K, Task<K>> CipherMode;
 
         public abstract Task<T> GetCiphertext();
         public abstract Task<T> GetPlaintext();
 
+        public abstract void SetCiphertext(T ciphertext);
+        public abstract void SetPlaintext(T plaintext);
+
+
 
     }
 
-    public abstract class CipherDataString : ISymmetricCipherData<string>
+    public abstract class CipherDataString : ISymmetricCipherData<string, string>
     {
-        CipherDataString(ISymmetricCipher<string, Task<string>> Cipher)
+        public CipherDataString(ISymmetricCipher<string, Task<string>> Cipher)
         {
             this.CipherMode = Cipher;
         }
-        public class CipherDataStringAes : CipherDataString
+    }
+    public class CipherDataStringAes : CipherDataString
+    {
+        private string? Plaintext { get; set; }
+        private string? Ciphertext { get; set; }
+
+        private string Key { get; set; }
+        private string Iv { get; set; }
+        CipherDataStringAes(string Key, string Iv) : base(new AesEcbString())
         {
-            private string? Plaintext { get; set; }
-            private string? Ciphertext { get; set; }
+            this.Key = Key;
+            this.Iv = Iv;
+        }
 
-            private string Key { get; set; }
-            private string Iv { get; set; }
-            CipherDataStringAes(string Key, string Iv) : base(new AesEcbString())
+        public async override Task<string> GetCiphertext()
+        {
+            if (this.Plaintext == null)
             {
-                this.Key = Key;
-                this.Iv = Iv;
+                throw new InvalidOperationException("Must define plaintext before you can decrypt");
             }
+            this.Ciphertext ??= await base.CipherMode.Encrypt(this.Plaintext, this.Key, this.Iv);
 
-            public async override Task<string> GetCiphertext()
-            {
-                if (this.Plaintext == null)
-                {
-                    throw new InvalidOperationException("Must define plaintext before you can decrypt");
-                }
-                if (this.Ciphertext == null)
-                {
-                    return await base.CipherMode.Encrypt(this.Plaintext, this.Key, this.Iv);
-                }
-                return this.Ciphertext;
-            }
+            return this.Ciphertext;
+        }
 
-            public async override Task<string> GetPlaintext()
+        public async override Task<string> GetPlaintext()
+        {
+            if (this.Ciphertext == null)
             {
-                if (this.Ciphertext == null)
-                {
-                    throw new InvalidOperationException("Must define ciphertext before you can decrypt");
-                }
-                if (this.Plaintext == null)
-                {
-                    return await base.CipherMode.Decrypt(this.Ciphertext, this.Key, this.Iv);
-                }
-                return this.Plaintext;
+                throw new InvalidOperationException("Must define ciphertext before you can decrypt");
             }
+            this.Plaintext ??= await base.CipherMode.Decrypt(this.Ciphertext, this.Key, this.Iv);
+            return this.Plaintext;
+        }
+
+        public override void SetCiphertext(string Ciphertext)
+        {
+            this.Ciphertext = Ciphertext;
+        }
+
+        public override void SetPlaintext(string plaintext)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class CipherDataAesEmoji : ISymmetricCipherData<EmojiArrayBase64String, string>
+    {
+        private string? Plaintext { get; set; }
+        private string? Ciphertext { get; set; }
+
+        private string Key { get; set; }
+        private string Iv { get; set; }
+        public CipherDataAesEmoji(string Key, string Iv)
+        {
+            this.CipherMode = new AesEcbString();
+            this.Key = Key;
+            this.Iv = Iv;
+        }
+
+        public async override Task<EmojiArrayBase64String> GetCiphertext()
+        {
+            if (this.Plaintext == null)
+            {
+                throw new InvalidOperationException("Must define plaintext before you can decrypt");
+            }
+            this.Ciphertext = await base.CipherMode.Encrypt(this.Plaintext, this.Key, this.Iv);
+   
+            return new EmojiArrayBase64String(this.Ciphertext);
+        }
+
+        public async override Task<EmojiArrayBase64String> GetPlaintext()
+        {
+            if (this.Ciphertext == null)
+            {
+                throw new InvalidOperationException("Must define ciphertext before you can decrypt");
+            }
+            this.Plaintext = await base.CipherMode.Decrypt(this.Ciphertext, this.Key, this.Iv);
+            return new EmojiArrayBase64String(this.Plaintext);
+        }
+
+        public override void SetCiphertext(EmojiArrayBase64String Ciphertext)
+        {
+            this.Ciphertext = Ciphertext.GetEncodedString();
+        }
+
+        public override void SetPlaintext(EmojiArrayBase64String Plaintext)
+        {
+            this.Plaintext = Plaintext.GetEncodedString();
         }
     }
 }
